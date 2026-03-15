@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Snow Man Project</title>
+  <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;600&display=swap" rel="stylesheet"/>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  <style>
+    body { font-family: 'Caveat', cursive; }
+
+    .nav-btn {
+      font-family: 'Caveat', cursive;
+      font-size: 22px;
+      color: #fff !important;
+      background: linear-gradient(180deg, #f78fb0 0%, #e85d8a 100%);
+      border: none;
+      min-width: 110px;
+      box-shadow: 0 4px 8px rgba(220,80,130,0.3);
+      transition: filter 0.15s, transform 0.1s;
+    }
+    .nav-btn:hover  { filter: brightness(1.08); transform: translateY(-1px); }
+    .nav-btn.active { background: linear-gradient(180deg, #e85d8a 0%, #c73d70 100%); }
+
+    #services-dropdown {
+      top: calc(100% + 6px);
+      left: 0;
+      width: 100%;
+      z-index: 100;
+    }
+    #services-dropdown li {
+      font-family: 'Caveat', cursive;
+      font-size: 20px;
+      color: #c94f78;
+      background: linear-gradient(180deg, #f9b8cf 0%, #f48aad 100%);
+      cursor: pointer;
+      transition: filter 0.15s, transform 0.1s;
+    }
+    #services-dropdown li:hover { filter: brightness(1.07); transform: translateY(-1px); }
+
+    .slider-arrow { font-size: 30px; color: #e85d8a; font-family: sans-serif; }
+    .slider-arrow:hover { color: #c73d70; }
+    .slider-img { width: 300px; height: 200px; object-fit: cover; }
+  </style>
+</head>
+<body class="bg-white min-vh-100">
+
+  <div class="d-flex justify-content-center gap-2 pt-3">
+    <button class="nav-btn btn rounded-3 px-4 py-2" data-target="about">About</button>
+    <button class="nav-btn btn rounded-3 px-4 py-2" data-target="gallery">Gallary</button>
+
+    <div class="position-relative" id="services-wrap">
+      <button class="nav-btn btn rounded-3 px-4 py-2" id="services-toggle">Services &#9662;</button>
+      <ul id="services-dropdown" class="d-none position-absolute list-unstyled m-0 p-0">
+        <li class="rounded-3 text-center py-2 px-3 mb-2 shadow-sm" data-service="item1">Item #1</li>
+        <li class="rounded-3 text-center py-2 px-3 mb-2 shadow-sm" data-service="item2">Item #2</li>
+        <li class="rounded-3 text-center py-2 px-3 shadow-sm"       data-service="item3">Item #3</li>
+      </ul>
+    </div>
+
+    <button class="nav-btn btn rounded-3 px-4 py-2" data-target="complain">Complain</button>
+  </div>
+
+  <div class="d-flex justify-content-center py-5 px-3">
+
+    <div id="panel-about" class="d-none" style="width:380px;">
+      <div class="card shadow-sm p-4">
+        <h5 class="text-center fw-semibold text-secondary mb-3">Story About snow man</h5>
+        <p class="text-secondary mb-0 text-white">
+          if you manage to read this, then you have found secret text used to give extra height to the box and is used as a placeholder, written by abdelrahim!
+        </p>
+      </div>
+    </div>
+
+    <div id="panel-gallery" class="d-none">
+      <div class="d-flex align-items-center gap-2">
+        <button id="gallery-prev" class="slider-arrow btn border-0 bg-transparent p-1">&#8249;</button>
+        <img id="gallery-img" src="" alt="Gallery image" class="slider-img rounded shadow-sm"/>
+        <button id="gallery-next" class="slider-arrow btn border-0 bg-transparent p-1">&#8250;</button>
+      </div>
+    </div>
+
+    <div id="panel-services" class="d-none" style="width:380px;">
+      <div class="card shadow-sm p-4">
+        <h5 id="service-title" class="text-center fw-semibold mb-3" style="color:#e85d8a;"></h5>
+        <p id="service-desc" class="text-secondary mb-0"></p>
+      </div>
+    </div>
+
+    <div id="panel-complain" class="d-none" style="width:380px;">
+      <div class="card shadow-sm p-4">
+        <div class="row align-items-center mb-3">
+          <label for="inp-name" class="col-3 text-end text-secondary">Name :</label>
+          <div class="col-9"><input type="text" id="inp-name" class="form-control" autocomplete="off"/></div>
+        </div>
+        <div class="row align-items-center mb-3">
+          <label for="inp-email" class="col-3 text-end text-secondary">Email :</label>
+          <div class="col-9"><input type="text" id="inp-email" class="form-control" autocomplete="off"/></div>
+        </div>
+        <div class="row align-items-center mb-3">
+          <label for="inp-phone" class="col-3 text-end text-secondary">Phone :</label>
+          <div class="col-9"><input type="text" id="inp-phone" class="form-control" autocomplete="off"/></div>
+        </div>
+        <label class="d-block text-center text-secondary mb-2">Complain :</label>
+        <textarea id="complain-text" class="form-control mb-2" rows="4"></textarea>
+        <div id="form-error" class="text-center text-danger small mb-2"></div>
+        <div class="text-center">
+          <button id="send-btn" class="btn btn-light border">send</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="panel-confirm" class="d-none" style="width:380px;">
+      <div class="card shadow-sm p-4 text-center lh-lg text-secondary">
+        <div class="mb-1">Your complain is <span id="conf-complain" class="fw-bold text-dark"></span></div>
+        <div class="mb-1">Your name is <span id="conf-name" class="fw-bold text-dark"></span></div>
+        <div class="mb-1">Your email is <span id="conf-email" class="fw-bold text-dark"></span></div>
+        <div class="mb-3">Your phone is <span id="conf-phone" class="fw-bold text-dark"></span></div>
+        <div><button id="back-btn" class="btn btn-light border">Back to edit</button></div>
+      </div>
+    </div>
+
+  </div>
+
+  <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+  <script>
+  $(function () {
+
+    var galleryIdx = 0;
+    var galleryCount = 8;
+
+    function hideAllPanels() {
+      $('#panel-about, #panel-gallery, #panel-services, #panel-complain, #panel-confirm')
+        .addClass('d-none');
+    }
+
+    function showPanel(id) {
+      hideAllPanels();
+      $('#' + id).removeClass('d-none');
+    }
+
+    $('.nav-btn[data-target]').on('click', function () {
+      var target = $(this).data('target');
+      $('.nav-btn').css('background', 'linear-gradient(180deg,#f78fb0,#e85d8a)');
+      $(this).css('background', 'linear-gradient(180deg,#e85d8a,#c73d70)');
+      $('#services-dropdown').slideUp(200).addClass('d-none');
+      showPanel('panel-' + target);
+    });
+
+    function updateGallery() { $('#gallery-img').attr('src', `./JQueryImages/${galleryIdx}.jpg`); }
+
+    $('#gallery-prev').on('click', function () {
+      galleryIdx = (galleryIdx - 1 + galleryCount) % galleryCount;
+      updateGallery();
+    });
+    $('#gallery-next').on('click', function () {
+      galleryIdx = (galleryIdx + 1) % galleryCount;
+      updateGallery();
+    });
+
+    var serviceData = {
+      item1: { title: 'Item #1', desc: 'Item 1 for JQuery Task.' },
+      item2: { title: 'Item #2', desc: 'Item 2 for JQuery Task.' },
+      item3: { title: 'Item #3', desc: 'Item 3 for JQuery Task.' }
+    };
+
+    $('#services-toggle').on('click', function (e) {
+      e.stopPropagation();
+      var $dd = $('#services-dropdown');
+      if ($dd.is(':visible')) {
+        $dd.slideUp(200, function () { $dd.addClass('d-none'); });
+        $(this).css('background', 'linear-gradient(180deg,#f78fb0,#e85d8a)');
+      } else {
+        $('.nav-btn').css('background', 'linear-gradient(180deg,#f78fb0,#e85d8a)');
+        $(this).css('background', 'linear-gradient(180deg,#e85d8a,#c73d70)');
+        hideAllPanels();
+        $dd.removeClass('d-none').hide().slideDown(250);
+      }
+    });
+
+    $('#services-dropdown li').on('click', function () {
+      var info = serviceData[$(this).data('service')];
+      $('#service-title').text(info.title);
+      $('#service-desc').text(info.desc);
+      $('#services-dropdown').slideUp(180, function () {
+        $(this).addClass('d-none');
+      });
+      hideAllPanels();
+      $('#panel-services').removeClass('d-none').hide().slideDown(300);
+    });
+
+    $(document).on('click', function () {
+      var $dd = $('#services-dropdown');
+      if ($dd.is(':visible')) {
+        $dd.slideUp(200, function () { $dd.addClass('d-none'); });
+        $('#services-toggle').css('background', 'linear-gradient(180deg,#f78fb0,#e85d8a)');
+      }
+    });
+
+    $('#send-btn').on('click', function () {
+      var name     = $.trim($('#inp-name').val());
+      var email    = $.trim($('#inp-email').val());
+      var phone    = $.trim($('#inp-phone').val());
+      var complain = $.trim($('#complain-text').val());
+
+      if (!name || !email || !phone || !complain) {
+        $('#form-error').text('Please fill in all fields.');
+        return;
+      }
+      $('#form-error').text('');
+      $('#conf-complain').text(complain);
+      $('#conf-name').text(name);
+      $('#conf-email').text(email);
+      $('#conf-phone').text(phone);
+      showPanel('panel-confirm');
+    });
+
+    $('#back-btn').on('click', function () {
+      $('#inp-name, #inp-email, #inp-phone').val('');
+      $('#complain-text').val('');
+      $('#form-error').text('');
+      showPanel('panel-complain');
+    });
+
+    updateGallery();
+  });
+  </script>
+</body>
+</html>
+
