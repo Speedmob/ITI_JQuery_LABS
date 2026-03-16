@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title> Blackhole </title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/css/bootstrap.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.13.2/jquery-ui.min.js"></script>
+  <style>
+    body {
+      background: #fff;
+    }
+
+    h1.page-title {
+      font-size: 1.6rem;
+      font-weight: bold;
+      color: #000;
+      margin-bottom: 6px;
+    }
+
+    #arena {
+      position: relative;
+      width: 100%;
+      height: 380px;
+    }
+
+    #black-hole {
+      position: absolute;
+      left: 30px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 210px;
+      height: 210px;
+      cursor: default;
+      transition: filter 0.25s;
+    }
+    #black-hole img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      border-radius: 50%;
+    }
+
+    .drag-card {
+      position: absolute;
+      cursor: grab;
+      text-align: center;
+      background: #ffd700;
+      border: 2px solid #bba800;
+      padding: 4px 6px 6px;
+      width: 110px;
+      user-select: none;
+    }
+    .drag-card:active { cursor: grabbing; }
+    .drag-card.ui-draggable-dragging {
+      z-index: 999;
+      opacity: 0.85;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.25);
+    }
+    .drag-card img {
+      width: 90px;
+      height: 90px;
+      object-fit: cover;
+      display: block;
+      margin: 0 auto;
+    }
+    .drag-label {
+      font-size: 13px;
+      font-weight: bold;
+      color: #333;
+      margin-top: 3px;
+    }
+
+  </style>
+</head>
+<body class="p-3">
+
+  <div id="arena">
+
+    <div id="black-hole">
+      <img id="hole-img" src="images/3.jpg" alt="Black Hole"
+           onerror="this.style.outline='2px dashed #aaa';">
+    </div>
+
+    <div class="drag-card" id="item1" style="right: 220px; top: 40px;">
+      <img src="https://upload.wikimedia.org/wikipedia/en/thumb/1/1c/Bugs_Bunny.svg/220px-Bugs_Bunny.svg.png"
+           onerror="this.src='https://picsum.photos/seed/cartoon1/90/90'" alt="Drag Me">
+      <div class="drag-label">Drag Me</div>
+    </div>
+
+    <div class="drag-card" id="item2" style="right: 80px; top: 30px;">
+      <img src="https://picsum.photos/seed/animal1/90/90" alt="Drag Me">
+      <div class="drag-label">Drag Me</div>
+    </div>
+
+    <div class="drag-card" id="item3" style="right: 160px; top: 210px;">
+      <img src="https://picsum.photos/seed/bird3/90/90" alt="Drag Me">
+      <div class="drag-label">Drag Me</div>
+    </div>
+
+    <div class="drag-card" id="item4" style="right: 40px; top: 220px;">
+      <img src="https://picsum.photos/seed/fox12/90/90" alt="Drag Me">
+      <div class="drag-label">Drag Me</div>
+    </div>
+
+  </div>
+
+  <div id="status-line" class="mt-2 text-muted small"></div>
+
+  <button id="btn-reset" class="btn btn-outline-secondary btn-sm mt-2">↺ Reset</button>
+
+  <script>
+    var absorbed = 0;
+    var total    = 4;
+    var origPos = {};
+    $('.drag-card').each(function () {
+      origPos[this.id] = { right: $(this).css('right'), top: $(this).css('top') };
+    });
+
+    $('.drag-card').draggable({
+      revert:         'invalid',
+      revertDuration: 280,
+      zIndex:         999,
+      opacity:        0.85,
+      helper:         'original'
+    });
+
+    $('#black-hole').droppable({
+      accept:    '.drag-card',
+      tolerance: 'intersect',
+
+      over: function (e, ui) {
+        $(this).addClass('hovered');
+        ui.draggable.css('opacity', 0.5);
+      },
+      out: function (e, ui) {
+        $(this).removeClass('hovered');
+        ui.draggable.css('opacity', 1);
+      },
+      drop: function (e, ui) {
+        var $hole = $(this);
+        var $item = ui.draggable;
+        absorbed++;
+
+        $item.css({ zIndex: 1000 });
+        $item.animate(
+          { opacity: 0 },
+          {
+            duration: 380,
+            complete: function () {
+              $item.hide();
+              $hole.removeClass('hovered');
+            }
+          }
+        );
+
+        var remaining = total - absorbed;
+        $('#status-line').text(
+          absorbed >= total
+            ? '✓ All items absorbed!'
+            : remaining + ' item(s) left to drag.'
+        );
+      }
+    });
+
+    $('#btn-reset').on('click', function () {
+      absorbed = 0;
+      $('#status-line').text('');
+      $('.drag-card').each(function () {
+        var id = this.id;
+        $(this).stop(true, true).show().css({
+          position: 'absolute',
+          opacity:  1,
+          left:     '',
+          right:    origPos[id].right,
+          top:      origPos[id].top
+        });
+      });
+    });
+  </script>
+
+</body>
+</html>

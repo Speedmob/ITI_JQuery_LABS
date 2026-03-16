@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title> Car animation </title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/css/bootstrap.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+  <style>
+    body {
+      background: #fff;
+      padding: 12px;
+    }
+
+    #stage {
+      position: relative;
+      width: 100%;
+      height: 120px;
+    }
+
+    #car-img {
+      position: absolute;
+      left: 0px;
+      top: 50%;
+      transform: translateY(-50%);
+      height: 90px;
+      width: auto;
+      display: block;
+    }
+
+    #markup-line {
+      font-family: 'Courier New', Courier, monospace;
+      font-size: 13px;
+      color: #000;
+      margin-top: 8px;
+    }
+    #markup-line .tag-name  { color: #000080; }
+    #markup-line .attr-name { color: #ff0000; }
+    #markup-line .attr-val  { color: #0000ff; }  
+    #markup-line .left-num  { color: #0000ff; font-weight: bold; }
+
+    #controls {
+      margin-top: 18px;
+    }
+  </style>
+</head>
+<body>
+  <div id="stage">
+    <img id="car-img" src="images/12.gif" alt="car"
+         onerror="this.style.outline='2px dashed #aaa'; this.alt='No image — upload a .gif above';">
+  </div>
+
+  <div id="markup-line">
+    <span class="tag-name">&lt;img</span>
+    <span class="attr-name"> src=</span><span class="attr-val">"12.gif"</span>
+    <span class="attr-name"> style=</span><span class="attr-val">"left: <span id="left-val" class="left-num">0</span>px"</span>
+    <span class="tag-name">/&gt;</span>
+  </div>
+
+  <div id="controls" class="d-flex gap-2">
+    <button id="btn-start" class="btn btn-primary btn-sm">&#9654; Animate</button>
+    <button id="btn-reset" class="btn btn-secondary btn-sm">&#8635; Reset</button>
+  </div>
+
+  <script>
+    $(function () {
+      var $car = $('#car-img');
+
+      function getMaxLeft() {
+        return $('#stage').width() - $car.outerWidth(true);
+      }
+
+      $('#btn-start').on('click', function () {
+        $(this).prop('disabled', true);
+        var maxLeft = getMaxLeft();
+        $car.css('left', '0px');
+        $car.animate(
+          { left: maxLeft },
+          {
+            duration: 3000,
+            easing:   'linear',
+            step: function (now) {
+              var pct = Math.round((now / maxLeft) * 100);
+              $('#left-val').text(Math.round(now));
+              $('#progress-bar').css('width', pct + '%');
+              $('#pct-label').text(pct + '%');
+            },
+            complete: function () {
+              $('#btn-start').prop('disabled', false);
+            }
+          }
+        );
+      });
+
+      $('#btn-reset').on('click', function () {
+        $car.stop(true, false).css('left', '0px');
+        $('#left-val').text('0');
+        $('#progress-bar').css('width', '0%');
+        $('#pct-label').text('0%');
+        $('#btn-start').prop('disabled', false);
+      });
+    });
+  </script>
+
+</body>
+</html>

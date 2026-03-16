@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title> SlideShow </title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/css/bootstrap.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+  <style>
+    body { background: #fff; }
+
+    .zoom-thumb {
+      position: relative;
+      overflow: hidden;
+      display: inline-block;
+      cursor: crosshair;
+      border: 1px solid #999;
+    }
+    .zoom-thumb img {
+      display: block;
+      width: 150px;
+      height: 112px;
+      object-fit: cover;
+    }
+    .zoom-lens {
+      display: none;
+      position: absolute;
+      border: 1px solid #0d6efd;
+      background: rgba(13,110,253,0.1);
+      width: 60px;
+      height: 50px;
+      pointer-events: none;
+      cursor: crosshair;
+    }
+    #zoom-result {
+      display: none;
+      position: fixed;
+      width: 300px;
+      height: 225px;
+      border: 1px solid #999;
+      overflow: hidden;
+      background: #fff;
+      z-index: 9999;
+      pointer-events: none;
+    }
+    #zoom-result img {
+      position: absolute;
+      max-width: none;
+    }
+
+    #slideshow-wrap {
+      position: relative;
+      width: 500px;
+      height: 310px;
+      overflow: hidden;
+      border: 1px solid #999;
+      background: #000;
+    }
+    .slide {
+      display: none;
+      position: absolute;
+      inset: 0;
+    }
+    .slide.active { display: block; }
+    .slide img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    .slide-caption {
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      background: rgba(0,0,0,0.5);
+      color: #fff;
+      padding: 6px 10px;
+      font-size: 13px;
+    }
+    .slide-dot {
+      display: inline-block;
+      width: 12px; height: 12px;
+      border-radius: 50%;
+      background: #ccc;
+      border: 1px solid #555;
+      cursor: pointer;
+      margin: 0 3px;
+    }
+    .slide-dot.active { background: #0d6efd; border-color: #0d6efd; }
+  </style>
+</head>
+<body class="p-4">
+
+  <div class="row g-5">
+
+    <div class="col-12 col-md-5">
+      <h6 class="fw-bold mb-1">Image Zoom Plugin</h6>
+      <p class="text-muted small mb-3">Hover over a thumbnail to zoom</p>
+
+      <div class="d-flex flex-wrap gap-2">
+        <div class="zoom-thumb" data-big="https://picsum.photos/seed/nature1/900/675">
+          <div class="zoom-lens"></div>
+          <img src="https://picsum.photos/seed/nature1/150/112" alt="Nature">
+          <div class="small text-center mt-1">Nature</div>
+        </div>
+        <div class="zoom-thumb" data-big="https://picsum.photos/seed/arch1/900/675">
+          <div class="zoom-lens"></div>
+          <img src="https://picsum.photos/seed/arch1/150/112" alt="Architecture">
+          <div class="small text-center mt-1">Architecture</div>
+        </div>
+        <div class="zoom-thumb" data-big="https://picsum.photos/seed/city22/900/675">
+          <div class="zoom-lens"></div>
+          <img src="https://picsum.photos/seed/city22/150/112" alt="City">
+          <div class="small text-center mt-1">City</div>
+        </div>
+        <div class="zoom-thumb" data-big="https://picsum.photos/seed/ocean5/900/675">
+          <div class="zoom-lens"></div>
+          <img src="https://picsum.photos/seed/ocean5/150/112" alt="Ocean">
+          <div class="small text-center mt-1">Ocean</div>
+        </div>
+      </div>
+
+      <div id="zoom-result">
+        <img id="zoom-result-img" src="" alt="">
+      </div>
+    </div>
+
+    <div class="col-12 col-md-7">
+      <h6 class="fw-bold mb-1">Image Slideshow Plugin</h6>
+      <p class="text-muted small mb-3">Auto-advances every 3 seconds</p>
+
+      <div id="slideshow-wrap">
+        <div class="slide active">
+          <img src="https://picsum.photos/seed/nature1/500/310" alt="Slide 1">
+          <div class="slide-caption"> Nature</div>
+        </div>
+        <div class="slide">
+          <img src="https://picsum.photos/seed/arch1/500/310" alt="Slide 2">
+          <div class="slide-caption"> Architecture</div>
+        </div>
+        <div class="slide">
+          <img src="https://picsum.photos/seed/city22/500/310" alt="Slide 3">
+          <div class="slide-caption"> City</div>
+        </div>
+        <div class="slide">
+          <img src="https://picsum.photos/seed/ocean5/500/310" alt="Slide 4">
+          <div class="slide-caption"> Ocean</div>
+        </div>
+      </div>
+
+      <div class="d-flex align-items-center gap-3 mt-2">
+        <button id="prev-btn" class="btn btn-outline-secondary btn-sm">&#8249; Prev</button>
+        <div id="dots-wrap" class="d-flex align-items-center"></div>
+        <button id="next-btn" class="btn btn-outline-secondary btn-sm">Next &#8250;</button>
+        <button id="play-btn" class="btn btn-primary btn-sm ms-auto">⏸ Pause</button>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    $.fn.imageZoom = function (opts) {
+      opts = $.extend({ factor: 3, rW: 300, rH: 225 }, opts);
+      var $result    = $('#zoom-result');
+      var $resultImg = $('#zoom-result-img');
+
+      return this.each(function () {
+        var $wrap = $(this);
+        var $lens = $wrap.find('.zoom-lens');
+        var bigSrc = $wrap.data('big');
+
+        $wrap.on('mouseenter', function () {
+          $resultImg.attr('src', bigSrc);
+          $lens.show();
+          $result.fadeIn(120);
+        }).on('mouseleave', function () {
+          $lens.hide();
+          $result.fadeOut(120);
+        }).on('mousemove', function (e) {
+          var off = $wrap.offset();
+          var iW  = $wrap.outerWidth();
+          var iH  = $wrap.outerHeight();
+          var x   = e.pageX - off.left;
+          var y   = e.pageY - off.top;
+          var lW  = $lens.outerWidth();
+          var lH  = $lens.outerHeight();
+
+          var lx = Math.max(0, Math.min(x - lW/2, iW - lW));
+          var ly = Math.max(0, Math.min(y - lH/2, iH - lH));
+          $lens.css({ left: lx, top: ly });
+
+          var bigW = opts.rW * opts.factor;
+          var bigH = opts.rH * opts.factor;
+          $resultImg.css({
+            width:  bigW,
+            height: bigH,
+            left:   -(x / iW) * bigW + opts.rW / 2,
+            top:    -(y / iH) * bigH + opts.rH / 2
+          });
+
+          var rLeft = e.pageX + 14;
+          var rTop  = e.pageY - 14;
+          if (rLeft + opts.rW + 20 > $(window).width())  rLeft = e.pageX - opts.rW - 14;
+          if (rTop  + opts.rH + 20 > $(window).height()) rTop  = e.pageY - opts.rH - 20;
+          $result.css({ left: rLeft, top: rTop });
+        });
+      });
+    };
+
+    $('.zoom-thumb').imageZoom();
+  </script>
+
+  <script>
+    $.fn.slideShow = function (opts) {
+      opts = $.extend({ interval: 3000, speed: 500, auto: true, dotsEl: null }, opts);
+
+      return this.each(function () {
+        var $ss      = $(this);
+        var $slides  = $ss.find('.slide');
+        var total    = $slides.length;
+        var current  = 0;
+        var timer    = null;
+        var playing  = opts.auto;
+
+        if (opts.dotsEl) {
+          var $dc = $(opts.dotsEl).empty();
+          for (var i = 0; i < total; i++) {
+            $('<span class="slide-dot"></span>').attr('data-i', i).appendTo($dc);
+          }
+          updateDots();
+        }
+
+        function updateDots() {
+          if (!opts.dotsEl) return;
+          $(opts.dotsEl).find('.slide-dot').removeClass('active').eq(current).addClass('active');
+        }
+
+        function goTo(idx, dir) {
+          var $cur  = $slides.eq(current);
+          current   = (idx + total) % total;
+          var $nxt  = $slides.eq(current);
+          var inPos = dir === 'next' ? '100%' : '-100%';
+          var outPos= dir === 'next' ? '-100%': '100%';
+          $nxt.css({ left: inPos, display: 'block' });
+          $cur.animate({ left: outPos }, opts.speed, function () {
+            $cur.css({ display: 'none', left: 0 });
+          });
+          $nxt.animate({ left: 0 }, opts.speed);
+          updateDots();
+        }
+
+        function next() { goTo(current + 1, 'next'); }
+        function prev() { goTo(current - 1, 'prev'); }
+        function start() { timer = setInterval(next, opts.interval); playing = true; }
+        function stop()  { clearInterval(timer); playing = false; }
+
+        if (opts.auto) start();
+
+        $('#prev-btn').on('click', function () { stop(); prev(); start(); });
+        $('#next-btn').on('click', function () { stop(); next(); start(); });
+
+        if (opts.dotsEl) {
+          $(opts.dotsEl).on('click', '.slide-dot', function () {
+            var idx = parseInt($(this).data('i'));
+            if (idx !== current) { stop(); goTo(idx, idx > current ? 'next' : 'prev'); start(); }
+          });
+        }
+
+        $('#play-btn').on('click', function () {
+          if (playing) { stop(); $(this).text('▶ Play'); }
+          else         { start(); $(this).text('⏸ Pause'); }
+        });
+      });
+    };
+
+    $('#slideshow-wrap').slideShow({ interval: 3000, speed: 500, auto: true, dotsEl: '#dots-wrap' });
+  </script>
+
+</body>
+</html>

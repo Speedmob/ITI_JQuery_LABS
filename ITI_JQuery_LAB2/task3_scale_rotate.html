@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title> Rotate and Scale </title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/css/bootstrap.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+  <style>
+    body {
+      background: #fff;
+    }
+
+    #stage {
+      position: relative;
+      width: 100%;
+      height: 460px;
+      overflow: hidden;
+      background: #fff;
+    }
+
+    #flower-wrap {
+      position: absolute;
+      left: 120px;
+      top:  60px;
+      transform-origin: center center;
+      transform: scale(0.28) rotate(-55deg);
+    }
+
+    #flower-wrap img {
+      display: block;
+      width: 340px;
+      height: auto;
+    }
+  </style>
+</head>
+<body class="p-3">
+
+  <div id="stage">
+    <div id="flower-wrap">
+      <img id="flower-img" src="images/1.jpg" alt="flower pot"
+           onerror="this.style.outline='2px dashed #aaa';">
+    </div>
+  </div>
+
+  <div class="d-flex gap-2 mt-2">
+    <button id="btn-play"  class="btn btn-success btn-sm">▶ Play Animation</button>
+    <button id="btn-reset" class="btn btn-outline-secondary btn-sm">↺ Reset</button>
+  </div>
+
+  
+  <script>
+
+    $.cssHooks.scale = {
+      get: function (el) {
+        var v = $(el).data('_scale');
+        return v !== undefined ? v : 1;
+      },
+      set: function (el, v) {
+        $(el).data('_scale', v);
+        syncTransform(el);
+      }
+    };
+    $.cssHooks.rotateZ = {
+      get: function (el) {
+        var v = $(el).data('_rotate');
+        return v !== undefined ? v : 0;
+      },
+      set: function (el, v) {
+        $(el).data('_rotate', v);
+        syncTransform(el);
+      }
+    };
+    $.fx.step.scale   = function (fx) { $.cssHooks.scale.set(fx.elem, fx.now); };
+    $.fx.step.rotateZ = function (fx) { $.cssHooks.rotateZ.set(fx.elem, fx.now); };
+
+    function syncTransform(el) {
+      var s = parseFloat($(el).data('_scale'))  || 0.28;
+      var r = parseFloat($(el).data('_rotate')) || 0;
+      $(el).css('transform', 'scale(' + s + ') rotate(' + r + 'deg)');
+    }
+
+    $.fn.transformAnimate = function (toScale, toRotate, duration, easing, cb) {
+      return this.animate(
+        { scale: toScale, rotateZ: toRotate },
+        { duration: duration, easing: easing || 'swing', complete: cb }
+      );
+    };
+
+    var $fw = $('#flower-wrap');
+    $fw.data('_scale', 0.28).data('_rotate', -55);
+    syncTransform($fw[0]);
+
+    $('#btn-play').on('click', function () {
+      var $btn = $(this).prop('disabled', true);
+      $fw.stop(true).data('_scale', 0.28).data('_rotate', -55);
+      syncTransform($fw[0]);
+
+      $fw.transformAnimate(1, 0, 2200, 'swing', function () {
+        $btn.prop('disabled', false);
+      });
+    });
+
+    $('#btn-reset').on('click', function () {
+      $fw.stop(true);
+      $fw.data('_scale', 0.28).data('_rotate', -55);
+      syncTransform($fw[0]);
+      $('#btn-play').prop('disabled', false);
+    });
+  </script>
+
+</body>
+</html>
